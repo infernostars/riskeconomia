@@ -32,7 +32,7 @@ class TimeCog(commands.GroupCog, group_name="time"):
           embed = embed_template("The current date and time is:", readable)
           await interaction.response.send_message(embeds=[embed])
       except Exception as e:
-          error_embed = error_template(f"Time command failed.\n{logging.log.error(e)}")
+          error_embed = error_template(f"Time command failed.\n{logging.log.exception()}")
           await interaction.response.send_message(embeds=[error_embed])
 
 # The `setup` function is required for the cog to work
