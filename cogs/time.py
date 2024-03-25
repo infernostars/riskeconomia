@@ -23,18 +23,18 @@ class TimeCog(commands.GroupCog, group_name="time"):
         """
         Tells you the date and time in roleplay based on the current date and time in real life.
         """
-      rlepoch = 1710106702.049 # As spoken and confirmed with by Mecanimetales, these correspond to the real life..
-      rpepoch = -783754059.049 # ..and roleplay epochs respectively, with 91.310625 roleplay seconds passing for
-      currentrl = time.time()  # every 1 second in real life. This is what the time command sets out to do.
-      currentrp = rpepoch+((currentrl-rlepoch)*91.310625)
-      try:
-          readable = (datetime.utcfromtimestamp(0)+timedelta(seconds=currentrp)).strftime('%d %B %Y %H:%M:%S')
-          embed = embed_template("The current date and time is:", readable)
-          await interaction.response.send_message(embeds=[embed])
-      except Exception as e:
-          error_embed = error_template(f"Time command failed.\n{e}")
-          logging.log.exception()
-          await interaction.response.send_message(embeds=[error_embed])
+        rlepoch = 1710106702.049 # As spoken and confirmed with by Mecanimetales, these correspond to the real life..
+        rpepoch = -783754059.049 # ..and roleplay epochs respectively, with 91.310625 roleplay seconds passing for
+        currentrl = time.time()  # every 1 second in real life. This is what the time command sets out to do.
+        currentrp = rpepoch+((currentrl-rlepoch)*91.310625)
+        try:
+            readable = (datetime.utcfromtimestamp(0)+timedelta(seconds=currentrp)).strftime('%d %B %Y %H:%M:%S')
+            embed = embed_template("The current date and time is:", readable)
+            await interaction.response.send_message(embeds=[embed])
+        except Exception as e:
+            error_embed = error_template(f"Time command failed.\n{e}")
+            logging.log.exception()
+            await interaction.response.send_message(embeds=[error_embed])
 
 # The `setup` function is required for the cog to work
 async def setup(client):
