@@ -31,10 +31,8 @@ class TimeCog(commands.GroupCog, group_name="time"):
           readable = datetime.utcfromtimestamp().strftime('%-d %B %Y %H:%M:%S')
           embed = embed_template("The current date and time is:", readable)
           await interaction.response.send_message(embeds=[embed])
-      except:
-          log() # No documentation on how to log.. fuck
-          error_embed = error_template("Conversion to readable time failed. Contact LegitSi.")
-          
+      except e as Exception:
+          error_embed = error_template(f"Conversion to readable time failed. Fuck.\n{logging.log.error(e)}")
           await interaction.response.send_message(embeds=[error_embed])
 
 # The `setup` function is required for the cog to work
