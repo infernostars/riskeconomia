@@ -6,6 +6,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from datetime import datetime, timedelta
+import dateutil.parser as dp
 import time
 
 # Don't mind these universal constants, putting them here because I don't want numerous copies of these in the code.
@@ -41,12 +42,24 @@ class TimeCog(commands.Cog):
         app_commands.Choice(name="Roleplay", value="rp"),
         app_commands.Choice(name="Real Life", value="rl")
         ])
-    async def whenis(self, interaction: discord.Interaction, modes: app_commands.Choice[str], timestamp: float,):
+    @app_commands.choices(stamps=[
+        app_commands.Choice(name="Snowflake ID", value="snow"),
+        app_commands.Choice(name="Unix Timestamp", value="unix"),
+        app_commands.Choice(name="Date and Time", value="date")
+        ])
+    async def whenis(self, interaction: discord.Interaction, modes: app_commands.Choice[str], stamps: app_commands.Choice[str], timestamp: float):
         """
         Gives you both roleplay and real life time based on the unix timestamp given.
         """
+        # Spoiler alert: All of this is proessed in Unix time under the hood. God bless Unix time!
+        if stamps.value == "snow":
+            setime = datetime.utcfromtimestamp(((timestamp >> 22) + 1420070400000) / 1000)
+        elif stamps.value == "unix":
+            setime = timestamp
+        elif stamps.value == "date": # Presuambly YYYY-MM-DD HH:MM:SS
+            setime = dp.parse(timestamp).timestamp()
         if modes.value == "rp":
-            rptime = rpepoch+((timestamp-rlepoch)*91.310625)
+            rptime = rpepoch+((setime-rlepoch)*91.310625)
             try:
                 rlreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=timestamp)).strftime('%d %B %Y %H:%M:%S')
                 rpreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=rptime)).strftime('%d %B %Y %H:%M:%S')
