@@ -5,12 +5,15 @@ from backend.utils.embed_templates import embed_template, error_template
 import discord
 from discord import app_commands
 from discord.ext import commands
-# For time command
 from datetime import datetime, timedelta
+import dateutil.parser as dp
 import time
 
+# Don't mind these universal constants, putting them here because I don't want numerous copies of these in the code.
+rlepoch = 1710106702.049 # As spoken and confirmed with by Mecanimetales, these correspond to the real life and
+rpepoch = -783754059.049 # roleplay epochs respectively, with 91.310625 roleplay seconds passing for every second IRL.
 
-class TimeCog(commands.GroupCog, group_name="time"):
+class TimeCog(commands.Cog):
     def __init__(self, client):
         self.client = client
 
@@ -18,21 +21,67 @@ class TimeCog(commands.GroupCog, group_name="time"):
     async def on_ready(self):
         log.info("Cog: time loaded")
 
-    @app_commands.command(name="time")
-    async def time(self, interaction: discord.Interaction):
+    @app_commands.command(name="current")
+    async def current(self, interaction: discord.Interaction):
         """
         Tells you the date and time in roleplay based on the current date and time in real life.
         """
-        rlepoch = 1710106702.049 # As spoken and confirmed with by Mecanimetales, these correspond to the real life..
-        rpepoch = -783754059.049 # ..and roleplay epochs respectively, with 91.310625 roleplay seconds passing for
-        currentrl = time.time()  # every 1 second in real life. This is what the time command sets out to do.
+        currentrl = time.time() 
         currentrp = rpepoch+((currentrl-rlepoch)*91.310625)
         try:
             readable = (datetime.utcfromtimestamp(0)+timedelta(seconds=currentrp)).strftime('%d %B %Y %H:%M:%S')
             embed = embed_template("The current date and time is:", readable)
             await interaction.response.send_message(embeds=[embed])
         except Exception as e:
-            error_embed = error_template(f"Time command failed.\n{e}")
+            error_embed = error_template(f"Current command in time cog failed.\n{e}")
+            logging.log.exception()
+            await interaction.response.send_message(embeds=[error_embed])
+    
+    @app_commands.command(name="whenis")
+    @app_commands.choices(modes=[
+        app_commands.Choice(name="Roleplay", value="rp"),
+        app_commands.Choice(name="Real Life", value="rl")
+        ])
+    @app_commands.choices(stamps=[
+        app_commands.Choice(name="Snowflake ID", value="snow"),
+        app_commands.Choice(name="Unix Timestamp", value="unix"),
+        app_commands.Choice(name="Date and Time", value="date")
+        ])
+    async def whenis(self, interaction: discord.Interaction, modes: app_commands.Choice[str], stamps: app_commands.Choice[str], timestamp: float):
+        """
+        Gives you both roleplay and real life time based on the unix timestamp given.
+        """
+        # Spoiler alert: All of this is proessed in Unix time under the hood. God bless Unix time!
+        if stamps.value == "snow":
+            setime = datetime.utcfromtimestamp(((timestamp >> 22) + 1420070400000) / 1000)
+        elif stamps.value == "unix":
+            setime = timestamp
+        elif stamps.value == "date": # Presuambly YYYY-MM-DD HH:MM:SS
+            setime = dp.parse(timestamp).timestamp()
+        if modes.value == "rp":
+            rptime = rpepoch+((setime-rlepoch)*91.310625)
+            try:
+                rlreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=timestamp)).strftime('%d %B %Y %H:%M:%S')
+                rpreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=rptime)).strftime('%d %B %Y %H:%M:%S')
+                embed = embed_template(f"Assuming the input given is {rlreadable}:", rpreadable)
+                await interaction.response.send_message(embeds=[embed])
+            except Exception as e:
+                error_embed = error_template(f"Whenis Roleplay command in time cog failed.\n{e}")
+                logging.log.exception()
+                await interaction.response.send_message(embeds=[error_embed])
+        elif modes.value == "rl":
+            rltime = rlepoch+((timestamp-rpepoch)*91.310625)
+            try:
+                rlreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=rltime)).strftime('%d %B %Y %H:%M:%S')
+                rpreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=timestamp)).strftime('%d %B %Y %H:%M:%S')
+                embed = embed_template(f"Assuming the input given is {rpreadable}:", rlreadable)
+                await interaction.response.send_message(embeds=[embed])
+            except Exception as e:
+                error_embed = error_template(f"Whenis Real Life command in time cog failed.\n{e}")
+                logging.log.exception()
+                await interaction.response.send_message(embeds=[error_embed])
+        else:
+            error_embed = error_template(f"..what the fuck? How?! Contact LegitSi immediately!\n{e}")
             logging.log.exception()
             await interaction.response.send_message(embeds=[error_embed])
 
