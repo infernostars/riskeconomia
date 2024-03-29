@@ -37,7 +37,11 @@ class TimeCog(commands.Cog):
             await interaction.response.send_message(embeds=[error_embed])
     
     @app_commands.command(name="whenis")
-    async def whenis(self, interaction: discord.Interaction, mode: str, timestamp: float):
+    @app_commands.choices(modes=[
+        app_commands.Choice(name="Roleplay", value="rp"),
+        app_commands.Choice(name="Real Life", value="l")
+        ])
+    async def whenis(self, interaction: discord.Interaction, modes: app_commands.Choice[str], timestamp: float,):
         """
         Gives you both roleplay and real life time based on the unix timestamp given.
         """
@@ -64,7 +68,7 @@ class TimeCog(commands.Cog):
                 logging.log.exception()
                 await interaction.response.send_message(embeds=[error_embed])
         else:
-            error_embed = error_template(f"Mode not supplied or invalid.\n{e}")
+            error_embed = error_template(f"..what the fuck? How?! Contact LegitSi immediately!\n{e}")
             logging.log.exception()
             await interaction.response.send_message(embeds=[error_embed])
 
