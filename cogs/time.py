@@ -63,6 +63,10 @@ class TimeCog(commands.Cog):
                 error_embed = error_template(f"Whenis Real Life command in time cog failed.\n{e}")
                 logging.log.exception()
                 await interaction.response.send_message(embeds=[error_embed])
+        else:
+            error_embed = error_template(f"Mode not supplied or invalid.\n{e}")
+            logging.log.exception()
+            await interaction.response.send_message(embeds=[error_embed])
 
 # The `setup` function is required for the cog to work
 async def setup(client):
