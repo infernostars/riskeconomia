@@ -39,13 +39,13 @@ class TimeCog(commands.Cog):
     @app_commands.command(name="whenis")
     @app_commands.choices(modes=[
         app_commands.Choice(name="Roleplay", value="rp"),
-        app_commands.Choice(name="Real Life", value="l")
+        app_commands.Choice(name="Real Life", value="rl")
         ])
     async def whenis(self, interaction: discord.Interaction, modes: app_commands.Choice[str], timestamp: float,):
         """
         Gives you both roleplay and real life time based on the unix timestamp given.
         """
-        if mode.lower() == "roleplay" or mode.lower() == "rp":
+        if modes.value == "rp":
             rptime = rpepoch+((timestamp-rlepoch)*91.310625)
             try:
                 rlreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=timestamp)).strftime('%d %B %Y %H:%M:%S')
@@ -56,7 +56,7 @@ class TimeCog(commands.Cog):
                 error_embed = error_template(f"Whenis Roleplay command in time cog failed.\n{e}")
                 logging.log.exception()
                 await interaction.response.send_message(embeds=[error_embed])
-        elif mode.lower() == "real life" or mode.lower() == "rl":
+        elif modes.value == "rl":
             rltime = rlepoch+((timestamp-rpepoch)*91.310625)
             try:
                 rlreadable = (datetime.utcfromtimestamp(0)+timedelta(seconds=rltime)).strftime('%d %B %Y %H:%M:%S')
